@@ -1,481 +1,88 @@
 <!DOCTYPE html>
-<html lang="eS">
-
-<head>
+<html lang="es">
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Wikipedia</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
+    <title>Wikipedia.js — Búsqueda Enciclopédica</title>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
 
-    <!-- ==== PROXIMAS INTEGRACIONES ==== -->
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-    <!-- Modo lectura / Modo oscuro -->
-    <!-- Compartir resultados -->
-    <!-- Resumen con audio -->
-    <!-- Traducciones -->
-    <!-- Integrar imagenes -->
-    <!-- Páginas relacionadas -->
-    <!-- Sugerencias de autocompletado (en el input) -->
-    <!-- Historial de busquedas -->
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Linux Libertine', 'Georgia', 'Times', 'Source Serif Pro', serif;
-            margin: 2rem;
-            background: #fafafa;
-            color: #202122;
-        }
-
-        .alerta {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 0.7rem;
-            background: rgba(200, 0, 0, 0.25);
-            color: #800;
-            font-weight: bold;
-            text-align: center;
-            z-index: 10000;
-        }
-
-        .alerta a {
-            margin-left: 1rem;
-            color: #0645ad;
-            text-decoration: underline;
-            font-weight: normal;
-        }
-
-        .alerta a:hover {
-            color: #3366cc;
-        }
-
-        ::selection {
-            background: #e0e0e0;
-            color: #000;
-        }
-
-        a:visited {
-            color: #551a8b;
-        }
-
-        a.wiki:visited {
-            color: #4a3b8e;
-        }
-
-        .menu-wiki {
-            background: #f8f9fa;
-            color: #202122;
-            display: flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            position: relative;
-        }
-
-        .icono-menu {
-            background: none;
-            border: none;
-            color: #202122;
-            font-size: 1.5rem;
-            margin-right: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            padding: 0.4rem 0.6rem;
-        }
-
-        .icono-menu:hover {
-            background-color: rgba(162, 169, 177, 0.3);
-        }
-
-        .icono-menu:focus {
-            outline: 2px solid #3366cc;
-            outline-offset: 2px;
-        }
-
-
-        .menu-lateral {
-            background: #f8f9fa;
-            color: #202122;
-            position: absolute;
-            top: 80px;
-            left: 30px;
-            width: 250px;
-            padding: 1rem;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-        }
-
-        .menu-lateral>strong {
-            display: block;
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            padding-right: 3.5rem;
-            font-weight: 600;
-            color: #202122;
-        }
-
-        .menu-lateral.oculto {
-            display: none;
-        }
-
-        .menu-lateral ul {
-            list-style: none;
-            padding: 0;
-            margin-top: 1rem;
-        }
-
-        .menu-lateral li {
-            margin: 0.5rem 0;
-        }
-
-        .menu-lateral a {
-            color: #36c;
-            text-decoration: none;
-        }
-
-        .menu-lateral a:hover {
-            text-decoration: underline;
-        }
-
-        #cerrar-menu {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 2.8rem;
-            height: 2.8rem;
-            background-color: transparent;
-            border: none;
-            font-size: 2rem;
-            color: #202122;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bienvenida {
-            background-color: rgba(234, 236, 240, 0.466);
-            background-repeat: no-repeat;
-            padding: 2rem;
-            border: 1px solid #dcdcdc;
-            margin-bottom: 2rem;
-            max-width: 750px;
-        }
-
-        .bienvenida h1 {
-            font-size: 2rem;
-            font-weight: normal;
-            margin-bottom: 0.5rem;
-            color: #1a1a1a;
-        }
-
-        .bienvenida .destacado {
-            color: #6a60b0;
-        }
-
-        .bienvenida .destacado {
-            position: relative;
-            color: #6a60b0;
-            cursor: pointer;
-        }
-
-        /* Efecto Subrayado */
-        .bienvenida .destacado::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            bottom: -4px;
-            height: 2px;
-            width: 100%;
-            background-color: #6a60b0;
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform 0.3s ease;
-        }
-
-        .bienvenida .destacado:hover::after {
-            transform: scaleX(1);
-            transform-origin: left;
-        }
-
-        .bienvenida .normal {
-            color: #000;
-        }
-
-        .bienvenida p {
-            font-size: 1rem;
-            color: #4d4d4d;
-            margin: 0;
-        }
-
-        .bienvenida a {
-            color: #0645ad;
-            text-decoration: none;
-        }
-
-        .bienvenida a:hover {
-            text-decoration: underline;
-        }
-
-        .wiki {
-            color: #6a60b0;
-            cursor: pointer;
-            text-decoration: none;
-            position: relative;
-            transition: color 0.25s ease;
-        }
-
-        .wiki::after {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: #6a60b0;
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform 0.3s ease;
-        }
-
-        .wiki:hover,
-        .wiki:focus {
-            color: #4a42a3;
-            outline: none;
-        }
-
-        .wiki:hover::after,
-        .wiki:focus::after {
-            transform: scaleX(1);
-            transform-origin: left;
-            cursor: pointer;
-        }
-
-        p {
-            font-size: 1.125rem;
-            color: #3c4043;
-            margin-bottom: 1.75rem;
-            max-width: 600px;
-        }
-
-        form.buscador-wiki {
-            max-width: 600px;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .input-wrapper {
-            position: relative;
-            flex-grow: 1;
-        }
-
-        .input-wrapper .icon-lupa {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #72777d;
-            font-size: 1.8rem;
-            pointer-events: none;
-        }
-
-        form.buscador-wiki input[type="text"] {
-            width: 100%;
-            padding: 0.7rem 1rem 0.7rem 2.5rem;
-            font-size: 1rem;
-            border: 2px solid #d1d5db;
-            outline-offset: 2px;
-            transition: border-color 0.3s ease;
-            color: #202122;
-        }
-
-        form.buscador-wiki input[type="text"]:focus {
-            border-color: #6a60b0;
-            outline: none;
-        }
-
-        form.buscador-wiki button {
-            padding: 0.7rem 1.5rem;
-            font-size: 1rem;
-            color: #202122;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            user-select: none;
-        }
-
-        @media (max-width: 650px) {
-            form.buscador-wiki {
-                flex-direction: column;
-            }
-
-            form.buscador-wiki button {
-                margin-top: 0.5rem;
-            }
-        }
-
-        @media (min-width: 720px) {
-
-            .menu-lateral {
-                top: 80px;
-                left: 30px;
-                width: 250px;
-            }
-
-            .icono-menu {
-                background: none;
-                border: none;
-                color: #202122;
-                margin-right: 1rem;
-                cursor: pointer;
-                font-size: 1.5rem;
-                margin: 0;
-                padding: 0.4rem 0.6rem;
-                flex-shrink: 0;
-
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="alerta">
-        ⚠️ Alerta: Esta no es la página oficial de Wikipedia
-        <a href="https://es.wikipedia.org/wiki/Wikipedia:Portada" target="_blank" rel="noopener noreferrer">
-            Ir a Wikipedia oficial
-        </a>
-    </div>
-
-
+  <body>
+    <!-- Header -->
     <header class="menu-wiki">
-        <div class="contenedor-header">
-            <button id="abrir-menu" class="icono-menu">&#9776;</button>
-        </div>
+      <div class="contenedor-header">
+        <button id="abrir-menu" class="icono-menu" aria-label="Abrir menú">
+          &#9776;
+        </button>
+      </div>
     </header>
 
+    <!-- Side Navigation -->
     <nav id="menu-lateral" class="menu-lateral oculto">
-        <strong>Menú principal</strong>
-        <button id="cerrar-menu" aria-label="Cerrar menú" title="Cerrar menú" class="material-icons">close</button>
-        <ul>
-            <li><a href="#">Portada</a></li>
-            <li><a href="#">Portal de la comunidad</a></li>
-            <li><a href="#">Actualidad</a></li>
-            <li><a href="#">Cambios recientes</a></li>
-            <li><a href="#">Páginas nuevas</a></li>
-            <li><a href="#">Página aleatoria</a></li>
-            <li><a href="#">Ayuda</a></li>
-            <li><a href="#">Páginas especiales</a></li>
-        </ul>
+      <button
+        id="cerrar-menu"
+        class="material-icons"
+        aria-label="Cerrar menú"
+        title="Cerrar menú"
+      >
+        close
+      </button>
+
+      <ul>
+        <li><a href="#">Portada</a></li>
+        <li><a href="#">Portal de la comunidad</a></li>
+        <li><a href="#">Actualidad</a></li>
+        <li><a href="#">Cambios recientes</a></li>
+        <li><a href="#">Páginas nuevas</a></li>
+        <li><a href="#">Página aleatoria</a></li>
+        <li><a href="#">Ayuda</a></li>
+        <li><a href="#">Páginas especiales</a></li>
+      </ul>
     </nav>
 
-    <div class="bienvenida">
-        <h1><span class="normal">Bienvenidos</span> a <span class="destacado">Wikipedia</span></h1>
-        <p>Descubrí significados, contextos históricos, conocimiento general sobre una amplia variedad de temas y mucho
-            más... todo desde un solo lugar.</p>
-    </div>
+    <main>
+      <!-- Welcome Section -->
+      <section class="bienvenida">
+        <h1>
+          <span class="normal">Bienvenidos</span> a
+          <span class="destacado">Wikipedia</span>
+        </h1>
 
-    <form autocomplete="off" id="form" class="buscador-wiki" role="search" aria-label="Buscar en Wikipedia">
+        <p>
+          Descubrí significados, contextos históricos, conocimiento general
+          sobre una amplia variedad de temas y mucho más... todo desde un solo
+          lugar.
+        </p>
+      </section>
+
+      <!-- Search Form -->
+      <form
+        id="form"
+        class="buscador-wiki"
+        autocomplete="off"
+        role="search"
+        aria-label="Buscar en Wikipedia"
+      >
         <div class="input-wrapper">
-            <span class="material-icons icon-lupa" aria-hidden="true">search</span>
-            <input type="text" id="word" placeholder="Buscar en Wikipedia" />
+          <span class="material-icons icon-lupa" aria-hidden="true">
+            search
+          </span>
+          <input type="text" id="word" placeholder="Buscar en Wikipedia" />
         </div>
+
         <button type="submit" aria-label="Buscar">Buscar</button>
-    </form>
+      </form>
 
-    <div id="results"></div>
+      <div id="results"></div>
+    </main>
 
-    <script>
-        const form = document.getElementById('form');
-        const input = document.getElementById('word');
-        const results = document.getElementById('results');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const word = input.value.trim();
-            if (!word) return;
-
-            results.textContent = 'Buscando...';
-            results.classList.remove('visible');
-
-            try {
-                const url = `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`;
-                const res = await fetch(url);
-
-                if (!res.ok) throw new Error(`No se encontró información sobre "${word}". Probá con otra palabra.`);
-
-                const data = await res.json();
-
-                if (data.type === "disambiguation") {
-                    const items = data.extract?.split('\n').map(line => line.trim()).filter(line => line !== '' && !line.toLowerCase().includes("puede referirse a:"));
-                    const listHTML = items && items.length
-                        ? `<ul>${items.map(item => `<li>${item.trim()}</li>`).join('')}</ul>`
-                        : '<p>Revisá Wikipedia para más detalles.</p>';
-
-                    results.innerHTML = `
-                    <h2>${data.title} (Desambiguación)</h2>
-                    <p><em>Esta palabra tiene varios significados:</em></p>
-                    ${listHTML}
-                    <p>
-                        <a href="https://es.wikipedia.org/wiki/${encodeURIComponent(data.title)}" 
-                            target="_blank" rel="noopener noreferrer">
-                                Ver todos los significados en Wikipedia
-                        </a>
-                    </p>
-                `;
-                } else if (data.extract) {
-                    results.innerHTML = `
-                    <h2>${data.title}</h2>
-                    <p>${data.extract}</p>
-                    <p><small>Fuente: Wikipedia</small></p>
-                `;
-                } else {
-                    results.textContent = 'No se encontró extracto para esa palabra.';
-                }
-
-                results.classList.add('visible');
-
-            } catch (error) {
-                results.textContent = error.message;
-                results.classList.add('visible');
-            }
-        });
-
-        const abrirMenu = document.getElementById('abrir-menu');
-        const cerrarMenu = document.getElementById('cerrar-menu');
-        const menuLateral = document.getElementById('menu-lateral');
-
-        abrirMenu.addEventListener('click', () => {
-            menuLateral.classList.remove('oculto');
-        });
-
-        cerrarMenu.addEventListener('click', () => {
-            menuLateral.classList.add('oculto');
-        });
-
-        document.addEventListener('click', (event) => {
-            // Si el menú está oculto, no hacemos nada
-            if (menuLateral.classList.contains('oculto')) return;
-
-            // Verificamos si el click fue dentro del menú o en el botón de abrir menú
-            const clickDentroMenu = menuLateral.contains(event.target);
-            const clickEnAbrirMenu = abrirMenu.contains(event.target);
-
-            // Si el clic NO fue dentro del menú ni en el botón de abrir, cerramos el menú
-            if (!clickDentroMenu && !clickEnAbrirMenu) {
-                menuLateral.classList.add('oculto');
-            }
-        });
-
-    </script>
-
-    <footer>
-        <p>Visita <a href="https://es.wikipedia.org/wiki/Wikipedia:Portada" target="_blank" class="wiki">Wikipedia</a>
-            para más información</p>
-    </footer>
-</body>
-
+    <script src="main.js" defer></script>
+  </body>
 </html>
